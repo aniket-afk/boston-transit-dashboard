@@ -1,5 +1,9 @@
-# Python venv
+# Python
 venv/
 .env
 __pycache__/
 *.pyc
+# Jupyter Notebook
+.ipynb_checkpoints/
+# OS files
+.DS_Store
