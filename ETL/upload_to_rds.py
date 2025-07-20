@@ -1,24 +1,47 @@
 import os
-import boto3
 import json
+import logging
 import pandas as pd
+import boto3
 from sqlalchemy import create_engine, text
 
-# ---- CONFIGURATION ----
-AWS_BUCKET = 'your-s3-bucket'
-REGION = 'us-east-2c'
+# --------------------------
+# LOGGING CONFIGURATION
+# --------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s: %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-RDS_USER = 'PostgreSQL'
-RDS_PASS = 'Campnou10699'
-RDS_HOST = 'database-1.cz2682u2c789.us-east-2.rds.amazonaws.com'
-RDS_PORT = '5432'
-RDS_DB = 'postgres'
+# --------------------------
+# ENVIRONMENT VARIABLE LOADING
+# --------------------------
+# Local: pip install python-dotenv, and add a .env file (ignored in git)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
+# Fetch secrets (works for GitHub Actions secrets and .env files)
+AWS_BUCKET = os.environ['AWS_BUCKET']
+REGION = os.environ.get('AWS_REGION', 'us-east-1')
+RDS_USER = os.environ['RDS_USER']
+RDS_PASS = os.environ['RDS_PASS']
+RDS_HOST = os.environ['RDS_HOST']
+RDS_PORT = os.environ.get('RDS_PORT', '5432')
+RDS_DB = os.environ['RDS_DB']
+
+# --------------------------
+# CONNECTION SETUP
+# --------------------------
 engine = create_engine(f'postgresql://{RDS_USER}:{RDS_PASS}@{RDS_HOST}:{RDS_PORT}/{RDS_DB}')
 s3 = boto3.client('s3', region_name=REGION)
 
-# ---- HELPER FUNCTIONS ----
-
+# --------------------------
+# FLATTEN FUNCTIONS
+# --------------------------
 def flatten_trip_updates(json_data):
     rows = []
     for entity in json_data.get('entity', []):
@@ -30,13 +53,11 @@ def flatten_trip_updates(json_data):
         start_time = trip.get('start_time')
         start_date = trip.get('start_date')
         timestamp = trip_update.get('timestamp')
-
         for stu in trip_update.get('stop_time_update', []):
             stop_sequence = stu.get('stop_sequence')
             stop_id = stu.get('stop_id')
             arrival_time = stu.get('arrival', {}).get('time')
             departure_time = stu.get('departure', {}).get('time')
-
             rows.append({
                 'trip_id': trip_id,
                 'route_id': route_id,
@@ -50,7 +71,6 @@ def flatten_trip_updates(json_data):
                 'departure_time': departure_time
             })
     df = pd.DataFrame(rows)
-    # convert unix time columns to datetime if present
     for col in ['arrival_time', 'departure_time', 'timestamp']:
         df[col] = pd.to_datetime(df[col], unit='s', errors='coerce')
     return df
@@ -95,9 +115,11 @@ def flatten_alerts(json_data):
     df['end'] = pd.to_datetime(df['end'], unit='s', errors='coerce')
     return df
 
-# ---- RDS TABLE CREATION ----
-
+# --------------------------
+# RDS TABLE CREATION
+# --------------------------
 with engine.connect() as conn:
+    logger.info("Checking/creating tables if needed...")
     conn.execute(text("""
     CREATE TABLE IF NOT EXISTS trip_updates (
         id SERIAL PRIMARY KEY,
@@ -138,35 +160,35 @@ with engine.connect() as conn:
         start TIMESTAMP,
         end TIMESTAMP
     );"""))
+logger.info("Tables checked/created.")
 
-print("Tables checked/created.")
-
-# ---- PROCESS RAW FILES FROM S3 ----
-
+# --------------------------
+# PROCESS RAW FILES FROM S3
+# --------------------------
 def get_latest_file(prefix):
-    # List and return the latest file under a prefix
     objs = s3.list_objects_v2(Bucket=AWS_BUCKET, Prefix=prefix)
     if 'Contents' not in objs:
-        print(f"No files found in {prefix}")
+        logger.warning(f"No files found in {prefix}")
         return None
-    # Sort by LastModified descending
     latest = sorted(objs['Contents'], key=lambda x: x['LastModified'], reverse=True)[0]
+    logger.info(f"Latest file in {prefix}: {latest['Key']}")
     return latest['Key']
 
 def process_and_upload(prefix, flatten_func, table_name):
     key = get_latest_file(prefix)
     if not key:
-        print(f"No data for {prefix}")
+        logger.warning(f"No data for {prefix}")
         return
     obj = s3.get_object(Bucket=AWS_BUCKET, Key=key)
     json_data = json.load(obj['Body'])
     df = flatten_func(json_data)
-    print(f"{table_name}: {len(df)} rows")
+    logger.info(f"{table_name}: {len(df)} rows")
     if not df.empty:
         df.to_sql(table_name, engine, if_exists='append', index=False)
+        logger.info(f"Uploaded {len(df)} rows to {table_name}")
 
 process_and_upload('raw/trip_updates', flatten_trip_updates, 'trip_updates')
 process_and_upload('raw/vehicle_positions', flatten_vehicle_positions, 'vehicle_positions')
 process_and_upload('raw/alerts', flatten_alerts, 'alerts')
 
-print("All uploads complete.")
+logger.info("All uploads complete.")
