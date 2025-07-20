@@ -17,3 +17,13 @@ This project analyzes real-time performance and equity of Boston's MBTA public t
   - [Boston Neighborhood Demographics](https://data.boston.gov/dataset/boston-neighborhood-demographics)
 
 ## 🚀 Project Structure
+boston-transit-equity-dashboard/
+├── data/ # Data storage (raw & processed)
+├── etl/ # ETL and data processing scripts
+├── analytics/ # Analytics queries & metrics calculation
+├── dashboard/ # Power BI files and screenshots
+└── docs/ # Documentation & diagrams
+
+
+## ⚙️ How to Run
+_(instructions coming...)_
