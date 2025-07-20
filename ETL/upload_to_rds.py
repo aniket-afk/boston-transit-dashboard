@@ -36,7 +36,10 @@ RDS_DB = os.environ['RDS_DB']
 # --------------------------
 # CONNECTION SETUP
 # --------------------------
-engine = create_engine(f'postgresql://{RDS_USER}:{RDS_PASS}@{RDS_HOST}:{RDS_PORT}/{RDS_DB}')
+engine = create_engine(
+    f'postgresql://{RDS_USER}:{RDS_PASS}@{RDS_HOST}:{RDS_PORT}/{RDS_DB}?sslmode=require'
+)
+
 s3 = boto3.client('s3', region_name=REGION)
 
 # --------------------------
