@@ -1,0 +1,36 @@
+name: Upload ETL Data to RDS
+
+on:
+  workflow_dispatch:  # Manual trigger
+  # Or use schedule:
+  # schedule:
+  #   - cron: '0 * * * *'  # Every hour
+
+jobs:
+  etl-upload:
+    runs-on: ubuntu-latest
+    env:
+      RDS_USER: ${{ secrets.RDS_USER }}
+      RDS_PASS: ${{ secrets.RDS_PASS }}
+      RDS_HOST: ${{ secrets.RDS_HOST }}
+      RDS_PORT: ${{ secrets.RDS_PORT }}
+      RDS_DB: ${{ secrets.RDS_DB }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas boto3 sqlalchemy psycopg2-binary
+
+      - name: Run ETL and upload to RDS
+        run: |
+          python etl/upload_to_rds.py
