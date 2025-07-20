@@ -35,4 +35,4 @@ jobs:
 
       - name: Run ETL upload script
         run: |
-          python etl/upload_to_rds.py
+          python ETL/upload_to_rds.py
