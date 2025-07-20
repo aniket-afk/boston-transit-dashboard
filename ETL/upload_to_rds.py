@@ -108,11 +108,12 @@ def flatten_alerts(json_data):
             'description_text': alert.get('description_text', {}).get('translation', [{}])[0].get('text'),
             'severity': alert.get('severity_level'),
             'start': alert.get('active_period', [{}])[0].get('start'),
-            'end': alert.get('active_period', [{}])[0].get('end')
+            'end_time': alert.get('active_period', [{}])[0].get('end')
         })
     df = pd.DataFrame(rows)
     df['start'] = pd.to_datetime(df['start'], unit='s', errors='coerce')
-    df['end'] = pd.to_datetime(df['end'], unit='s', errors='coerce')
+    df['end_time'] = pd.to_datetime(df['end_time'], unit='s', errors='coerce')
+    logger.info(f"Alert DataFrame columns: {df.columns.tolist()}")
     return df
 
 # --------------------------
@@ -158,7 +159,7 @@ with engine.connect() as conn:
         description_text TEXT,
         severity VARCHAR(20),
         start TIMESTAMP,
-        end TIMESTAMP
+        end_time TIMESTAMP
     );"""))
 logger.info("Tables checked/created.")
 

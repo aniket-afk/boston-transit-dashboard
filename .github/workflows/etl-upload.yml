@@ -1,15 +1,16 @@
-name: Upload ETL Data to RDS
+name: Boston Transit ETL Upload
 
 on:
-  workflow_dispatch:  # Manual trigger
-  # Or use schedule:
-  # schedule:
-  #   - cron: '0 * * * *'  # Every hour
+  workflow_dispatch:  # Manual run from GitHub UI
+  schedule:
+    - cron: '0 0 * * *'   # Runs daily at midnight UTC
 
 jobs:
   etl-upload:
     runs-on: ubuntu-latest
     env:
+      AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
       RDS_USER: ${{ secrets.RDS_USER }}
       RDS_PASS: ${{ secrets.RDS_PASS }}
       RDS_HOST: ${{ secrets.RDS_HOST }}
@@ -19,18 +20,19 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
-          pip install pandas boto3 sqlalchemy psycopg2-binary
+          python -m pip install --upgrade pip
+          pip install pandas boto3 sqlalchemy psycopg2-binary python-dotenv
 
-      - name: Run ETL and upload to RDS
+      - name: Run ETL upload script
         run: |
           python etl/upload_to_rds.py
