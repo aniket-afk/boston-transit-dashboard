@@ -196,3 +196,20 @@ process_and_upload('raw/vehicle_positions', flatten_vehicle_positions, 'vehicle_
 process_and_upload('raw/alerts', flatten_alerts, 'alerts')
 
 logger.info("All uploads complete.")
+
+# --------------------------
+# DOWNLOAD TABLES TO LOCAL CSV
+# --------------------------
+def download_tables_to_local(directory='.'):
+    tables = ['trip_updates', 'vehicle_positions', 'alerts']
+    with engine.connect() as conn:
+        for table in tables:
+            logger.info(f"Downloading table {table} from RDS...")
+            df = pd.read_sql(f"SELECT * FROM {table};", conn)
+            file_path = f"{directory}/{table}.csv"
+            df.to_csv(file_path, index=False)
+            logger.info(f"Saved {table} to {file_path}")
+
+if __name__ == "__main__":
+    # Example usage: download tables to current directory
+    download_tables_to_local()
