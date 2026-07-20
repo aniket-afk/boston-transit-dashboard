@@ -16,6 +16,14 @@ models:
         tests:
           - not_null
           - unique
+
+  - name: mart_service_summary
+    description: "Service volume and delay by hour. Grain: one row per service hour. Extends to daily as history accumulates."
+    columns:
+      - name: service_hour
+        tests:
+          - not_null
+          - unique
           
   - name: mart_route_performance
     description: "Per-route delay metrics. Grain: one row per route. Snapshots collapsed to latest observation per prediction."

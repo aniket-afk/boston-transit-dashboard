@@ -21,7 +21,8 @@ by_route as (
 
         -- on-time = within 60s of schedule (transit industry convention varies; 60s is defensible)
         round(100.0 * count_if(p.delay_seconds <= 60) / count(*), 1) as pct_on_time,
-        round(100.0 * count_if(p.delay_seconds  > 60) / count(*), 1) as pct_late
+        round(100.0 * count_if(p.delay_seconds  > 60) / count(*), 1) as pct_late,
+        {{ confidence_flag('count(*)') }} as confidence
     from predictions p
     join {{ ref('dim_routes') }} r on p.route_id = r.route_id
     group by 1, 2, 3
