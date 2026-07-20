@@ -8,6 +8,14 @@ models:
         tests:
           - not_null
           - unique
+
+  - name: mart_accessibility_gaps
+    description: "Service quality by wheelchair-accessibility status. Grain: one row per accessibility category. Equity lens on delay."
+    columns:
+      - name: wheelchair_accessibility
+        tests:
+          - not_null
+          - unique
           
   - name: mart_route_performance
     description: "Per-route delay metrics. Grain: one row per route. Snapshots collapsed to latest observation per prediction."
