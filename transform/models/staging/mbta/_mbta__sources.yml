@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: mbta
+    description: "Raw MBTA V3 API data landed by the Python extractor."
+    database: RAW
+    schema: MBTA
+    tables:
+      - name: predictions
+        description: "Append-only snapshots of real-time predictions. One batch per extractor run, stamped with loaded_at."
+        config:
+          loaded_at_field: loaded_at
+          freshness:
+            warn_after: {count: 6, period: hour}
+            error_after: {count: 24, period: hour}
+        columns:
+          - name: id
+            description: "MBTA prediction id. NOT unique across snapshots — unique only together with loaded_at."
+      - name: routes
+        description: "Route dimension. Overwritten each run (current state)."
+      - name: stops
+        description: "Stop dimension. Overwritten each run (current state)."
+      - name: schedules
+        description: "Current service-day timetable. Overwritten each run. Provides scheduled arrival/departure — the baseline for delay."

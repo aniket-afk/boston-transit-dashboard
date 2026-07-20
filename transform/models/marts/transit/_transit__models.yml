@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: dim_routes
+    description: "Route dimension. One row per MBTA route."
+    columns:
+      - name: route_id
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_stops
+    description: "Stop dimension. One row per stop, with accessibility and location attributes."
+    columns:
+      - name: stop_id
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_predictions
+    description: "Prediction fact. Grain: one row per (prediction_id, loaded_at). Carries delay_seconds vs. the scheduled timetable."
+    columns:
+      - name: prediction_id
+        tests:
+          - not_null
+      - name: route_id
+        description: "FK to dim_routes."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_routes')
+                field: route_id
+      - name: stop_id
+        description: "FK to dim_stops."
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_stops')
+                field: stop_id
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - prediction_id
+              - loaded_at
