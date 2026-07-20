@@ -1,6 +1,14 @@
 version: 2
 
 models:
+  - name: mart_delays_by_neighborhood
+    description: "Per-municipality delay metrics. Grain: one row per municipality. Joins fact to dim_stops."
+    columns:
+      - name: municipality
+        tests:
+          - not_null
+          - unique
+          
   - name: mart_route_performance
     description: "Per-route delay metrics. Grain: one row per route. Snapshots collapsed to latest observation per prediction."
     columns:
@@ -8,7 +16,7 @@ models:
         tests:
           - not_null
           - unique
-          
+
   - name: dim_routes
     description: "Route dimension. One row per MBTA route."
     columns:
