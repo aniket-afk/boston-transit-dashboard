@@ -24,6 +24,13 @@ models:
         tests:
           - not_null
           - unique
+
+  - name: mart_delay_anomalies
+    description: "Statistical outliers: predictions with delay z-score beyond ±2. Grain: one row per anomalous prediction."
+    columns:
+      - name: prediction_id
+        tests:
+          - not_null
           
   - name: mart_route_performance
     description: "Per-route delay metrics. Grain: one row per route. Snapshots collapsed to latest observation per prediction."
