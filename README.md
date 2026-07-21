@@ -1,30 +1,8 @@
-![ETL workflow](https://github.com/aniket-afk/boston-transit-dashboard/actions/workflows/etl-upload.yml/badge.svg)
-# Boston-Transit-Dashboard
+Instructions
+Assignment Link: https://github.com/DataExpert-io/data-engineer-handbook/tree/main/bootcamp/materials/2-fact-data-modeling
+Submission Deadline: 2025-01-31 23:59:00
+GitHub Org: DataExpert-io
+Repo Name: data-engineer-handbook
 
-## 🚇 Project Overview
-This project analyzes real-time performance and equity of Boston's MBTA public transit system. It integrates live MBTA GTFS data, city demographics, and accessibility data to create actionable insights via an interactive Power BI dashboard.
-
-## 🎯 Key Questions
-- Which Boston neighborhoods face significant transit delays?
-- Are delays correlated with socioeconomic factors?
-- Where are accessibility gaps most prominent?
-
-## 🛠 Technologies Used
-- **Cloud**: AWS (Lambda, S3, EC2, Snowflake/Redshift)
-- **Data Engineering**: Python, Pandas, Requests, Airflow
-- **Visualization**: Power BI
-- **Data Sources**:
-  - [MBTA GTFS Real-Time](https://cdn.mbta.com/realtime/)
-  - [Boston Neighborhood Demographics](https://data.boston.gov/dataset/boston-neighborhood-demographics)
-
-## 🚀 Project Structure
-boston-transit-equity-dashboard/
-├── data/ # Data storage (raw & processed)
-├── etl/ # ETL and data processing scripts
-├── analytics/ # Analytics queries & metrics calculation
-├── dashboard/ # Power BI files and screenshots
-└── docs/ # Documentation & diagrams
-
-
-## ⚙️ How to Run
-_(instructions coming...)_
+Files
+No instructions or default files were provided for this assignment
