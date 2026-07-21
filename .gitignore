@@ -1,9 +1,20 @@
 # Python
+.venv/
 venv/
-.env
 __pycache__/
 *.pyc
-# Jupyter Notebook
-.ipynb_checkpoints/
-# OS files
+
+# dbt
+transform/target/
+transform/dbt_packages/
+transform/logs/
+logs/
+
+# secrets / keys
+.env
+.dbt_key.p8
+.dbt_key.pub
+
+# data files
+*.duckdb
 .DS_Store

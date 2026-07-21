@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_mbta__predictions
+    description: "Cleaned, typed, deduplicated prediction snapshots. Grain: one row per (prediction_id, loaded_at)."
+    columns:
+      - name: prediction_id
+        description: "MBTA prediction id. Repeats across snapshots by design."
+        tests:
+          - not_null
+      - name: loaded_at
+        tests:
+          - not_null
+      - name: route_id
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - prediction_id
+              - loaded_at
+
+  - name: stg_mbta__routes
+    description: "Route dimension: one row per route, direction arrays unpacked, route_type decoded."
+    columns:
+      - name: route_id
+        description: "Natural key, e.g. Red, Green-D, 66."
+        tests:
+          - not_null
+          - unique
+      - name: route_long_name
+        tests:
+          - not_null
+
+  - name: stg_mbta__stops
+    description: "Stop dimension: one row per stop, accessibility and location_type decoded to labels."
+    columns:
+      - name: stop_id
+        description: "Natural key for the stop/platform."
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_mbta__schedules
+    description: "Cleaned timetable. Grain: one row per (trip_id, stop_id) — a scheduled stop-event. Provides the 'scheduled' side of delay."
+    columns:
+      - name: trip_id
+        tests:
+          - not_null
+      - name: stop_id
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - trip_id
+              - stop_id
